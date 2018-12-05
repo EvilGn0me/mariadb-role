@@ -1,0 +1,20 @@
+---
+- name: add repo keys
+  apt_key:
+    keyserver: '{{ item.value.key_server }}'
+    id: '{{ item.value.key }}'
+  with_dict: '{{ mariadb.repos }}'
+
+- name: add repositories for mariadb
+  apt_repository:
+    repo: '{{ item.value.repo }}'
+    state: present
+  with_dict: '{{ mariadb.repos }}'
+
+- name: install mariadb packages
+  apt:
+    name: '{{ item }}'
+    state: latest
+    update_cache: yes
+  with_items:
+    - '{{ mariadb.packages }}'

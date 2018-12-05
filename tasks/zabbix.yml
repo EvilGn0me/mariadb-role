@@ -1,0 +1,61 @@
+- name: create dirs
+  file:
+    path: '{{ item }}'
+    state: directory
+    owner: root
+    group: root
+  with_items:
+    - /var/lib/zabbix/
+
+- name: manage zabbix user
+  user:
+    name: zabbix
+    shell: /sbin/nologin
+
+- name: manage zabbix mysql userparameter
+  template:
+    src: 'templates/userparameter_mysql.conf'
+    dest: '{{ mariadb.zabbix_dir }}/userparameter_mysql.conf'
+    owner: root
+    group: root
+    mode: 0644
+  notify: 'restart zabbix-agent'
+
+- name: Set create zabbix mysql user
+  mysql_user:
+    name: zabbix
+    password: '{{ mariadb_conf.zabbix_password }}'
+    state: present
+
+- name: update zabbix my.cnf
+  template:
+    src: templates/zabbix.my.cnf
+    dest: /var/lib/zabbix/.my.cnf
+    owner: zabbix
+    group: zabbix
+    mode: 0600
+
+- name: Import Zabbix json template configuration
+  local_action:
+    module: zabbix_template
+    server_url: '{{ zabbix_url }}'
+    login_user: '{{ zabbix_user}}'
+    login_password: '{{ zabbix_pass }}'
+    template_name: Template DB MySQL
+    template_json: '{{ lookup("file", "templates/zabbix_mysql.json") }}'
+    template_groups:
+      - Templates
+    state: present
+  ignore_errors: yes
+
+- name: Link host to template
+  local_action:
+    module: zabbix_host
+    server_url: '{{ zabbix_url }}'
+    login_user: '{{ zabbix_user}}'
+    login_password: '{{ zabbix_pass }}'
+    host_name: '{{ ansible_fqdn }}'
+    force: no
+    link_templates:
+      - Template DB MySQL
+  ignore_errors: yes

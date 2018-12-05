@@ -1,0 +1,15 @@
+---
+mariadb:
+  repos:
+    mariadb:
+      repo: 'deb http://mirror.truenetwork.ru/mariadb/repo/10.2/{{ ansible_distribution|lower }} {{ ansible_distribution_release|lower }} main main'
+      key: '0xF1656F24C74CD1D8'
+      key_server: 'keyserver.ubuntu.com'
+  packages:
+    - mariadb-server
+    - mariadb-client
+    - python-mysqldb
+    - libdbd-mysql-perl
+  services:
+    - mariadb
+  zabbix_dir: /etc/zabbix/zabbix_agentd.d

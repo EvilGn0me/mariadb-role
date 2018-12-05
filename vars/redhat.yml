@@ -1,0 +1,14 @@
+---
+mariadb:
+  repos:
+    mariadb:
+      name: 'mariadb-repo'
+      baseurl: 'http://yum.mariadb.org/10.2/centos7-amd64'
+  packages:
+    - MariaDB-server
+    - MariaDB-client
+    - MySQL-python
+    - perl-DBD-mysql
+  services:
+    - mariadb
+  zabbix_dir: /etc/zabbix/zabbix_agentd.d

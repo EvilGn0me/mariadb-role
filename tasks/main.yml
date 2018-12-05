@@ -1,0 +1,70 @@
+---
+# tasks file for mariadb
+- name: Load a variable file based on the OS type, or a default if not found. Using free-form to specify the file.
+  include_vars: '{{ item }}'
+  with_first_found:
+    - '{{ ansible_distribution|lower }}.yml'
+    - '{{ ansible_os_family|lower }}.yml'
+
+- name: pre-requisites tasks
+  import_tasks: redhat.yml
+  when: ansible_os_family|lower == 'redhat'
+
+- name: pre-requisites tasks
+  import_tasks: debian.yml
+  when: ansible_os_family|lower == 'debian'
+
+- name: manage mariadb server config
+  template:
+    src: templates/mysql_server.cnf
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart mariadb
+
+- name: install mysqltuner
+  get_url:
+    url: http://mysqltuner.pl
+    dest: /usr/local/bin/mysqltuner.pl
+    mode: 755
+
+- name: ensure service is running
+  service:
+    name: '{{ item }}'
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  with_items:
+  - '{{ mariadb.services }}'
+
+- name: Set root user password
+  mysql_user:
+    name: root
+    password: '{{ mariadb_conf.root_password }}'
+    check_implicit_admin: yes
+    state: present
+
+- name: update root my.cnf
+  template:
+    src: templates/user.my.cnf
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: 0600
+
+- name: remove all anonymous users from mysql
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+    login_user: root
+    login_password: '{{ mariadb_conf.root_password }}'
+
+- name: zabbix agent tasks
+  import_tasks: zabbix.yml
+  when: zabbix_url is defined
+
+- name: backup tasks
+  import_tasks: backup.yml
+  when: mariadb_conf.backup

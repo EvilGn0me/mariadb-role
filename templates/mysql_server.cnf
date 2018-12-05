@@ -1,0 +1,5 @@
+[mysqld]
+{{ mariadb_conf.server_config|join('\n') }}
+{% if mariadb_conf.networking == False %}
+skip-networking
+{% endif %}
