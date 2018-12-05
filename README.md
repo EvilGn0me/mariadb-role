@@ -2,7 +2,6 @@ MariaDB Role
 =========
 
 This role installs mariadb.
-This role written using [Ansible Codestyle](https://faunusaff.atlassian.net/wiki/spaces/DEVOPS/pages/634683425/Ansible+Codestyle)
 
 How to use
 ======
