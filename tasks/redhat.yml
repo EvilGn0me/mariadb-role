@@ -15,7 +15,5 @@
 
 - name: install packages
   yum:
-    name: '{{ item }}'
+    name: '{{ mariadb.packages }}'
     state: latest
-  with_items:
-    - '{{ mariadb.packages }}'

@@ -13,8 +13,6 @@
 
 - name: install mariadb packages
   apt:
-    name: '{{ item }}'
+    name: '{{ mariadb.packages }}'
     state: latest
     update_cache: yes
-  with_items:
-    - '{{ mariadb.packages }}'
